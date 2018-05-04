@@ -2,9 +2,11 @@
 
 id=$1
 
+MY_ROOT="$(dirname "$(realpath "${0}")")"
+
 
 #get access to functions in 'common.sh'
-source common.sh
+source "${MY_ROOT}/common.sh"
 
 
 #confirm parameters, or ask for values:
@@ -29,6 +31,6 @@ if [[ "${REPLY}" == "Y" ]] ; then
 	embedKey >> "${outfile}"
 	embedDH >> "${outfile}"
 
-#optional further hardening: must be enabled on all clients and server if on any! >> "${outfile}"
+#optional further hardening: must be enabled on all clients and server if on any!
 	enable_tls_auth_server >> "${outfile}"
 fi

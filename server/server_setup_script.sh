@@ -1,5 +1,6 @@
 #!/bin/bash
 
+VPN_SCRIPT_ROOT="$(dirname "$(realpath "${0}")")"
 
 #Summary:
 #0. generate PKI
@@ -17,7 +18,7 @@ function generatePKI()
 #needed exactly once to get the PKI set up.  Do not lose CA or re-run as existing keys will not work...
 	git clone https://github.com/OpenVPN/easy-rsa.git
 
-	pushd easy-rsa_/easyrsa3 >& /dev/null
+	pushd easy-rsa/easyrsa3 >& /dev/null
 
 	./easyrsa init-pki
 	./easyrsa build-ca
@@ -38,27 +39,33 @@ function installOVPN()
 
 function configureOVPNServer()
 {
-	VPN_HOST_CN=$1
+	VPN_HOST_CN="${1}"
+	CONF_FILENAME="${2}"
 
-	./mk_server_config.sh "${VPN_HOST_CN}"
+#generate a tls-auth key.
+	openvpn --genkey --secret ta.key
 
-	sudo cp "${VPN_HOST_CN}.ovpn" /etc/openvpn/karma_server.conf
-	sudo chmod 600 /etc/openvpn/karma_server.conf
-	sudo chown root:root /etc/openvpn/karma_server.conf
+	"${VPN_SCRIPT_ROOT}/mk_server_config.sh" "${VPN_HOST_CN}"
+
+	sudo cp "${VPN_HOST_CN}.ovpn" /etc/openvpn/${CONF_FILENAME}.conf
+	sudo chmod 600 /etc/openvpn/${CONF_FILENAME}.conf
+	sudo chown root:root /etc/openvpn/${CONF_FILENAME}.conf
 
 	sudo mkdir -p /etc/openvpn/ccd
 }
 
 function autostartVPNServer()
 {
+	CONF_FILENAME="${1}"
 #modify file
-	sudo sed -i 's/^AUTOSTART=.*/AUTOSTART="karma_server"/g' /etc/default/openvpn
+	sudo sed -i 's/^AUTOSTART=.*/AUTOSTART="'"${CONF_FILENAME}"'"/g' /etc/default/openvpn
 }
 
 function configFW()
 {
+	ADMIN_IP_RANGE="${1}"
 #when data comes in on tun0, it flows through the iptables system, and routing.
-	sudo iptables -A INPUT -m state RELATED,ESTABLISHED -j ACCEPT
+	sudo iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 	sudo iptables -A INPUT -i tun0 -j DROP
 
 
@@ -82,49 +89,57 @@ function saveFW()
 
 function installFWRestore()
 {
-#automatically reload after reboot:
-	sudo tee /etc/network/if-pre-up.d/iptables_restore > /dev/null <<-EOF
-		#!/bin/bash
+#create a script to automatically reload after reboot:
+	SCRIPT_FILE=/etc/network/if-pre-up.d/iptables_restore
 
-		iptables-restore < /etc/iptables.rules
-	EOF 
-	sudo chown root:root /etc/network/if-pre-up.d/iptables_restore
-	sudo chmod 744 /etc/network/if-pre-up.d/iptables_restore
+	sudo tee "${SCRIPT_FILE}" > /dev/null <<-EOF
+#!/bin/bash
+
+iptables-restore < /etc/iptables.rules
+EOF
+
+	sudo chown root:root "${SCRIPT_FILE}"
+	sudo chmod 744 "${SCRIPT_FILE}"
 }
 
 function enableRouting()
 {
-	sudo sysctl net.ipv4.ip_forward=1
+#immetiately
+	sudo sysctl net.ipv4.ip_forward=1 >/dev/null
 #make persistant.
 	sudo sed -i 's/.*net.ipv4.ip_forward=.*/net.ipv4.forward=1/g' /etc/sysctl.conf
 }
 
 
+#only untested function - until on server.
+function setupKarmaVPN()
+{
 #server:
 
-read -p "Do you want to generate the PKI system from scratch (this will invalidate the existing keys if completed)" REPLY
-if [[ "${REPLY}" == "YES" ]] ; then
+	read -p "Do you want to generate the PKI system from scratch (this will invalidate the existing keys if completed)" REPLY
+	if [[ "${REPLY}" == "YES" ]] ; then
 #0.
-	generatePKI
-fi
-read -p "Be sure to keep the password securely, but also it may be a while until you need it again <press enter to continue>"
+		generatePKI
+	fi
+	read -p "Be sure to keep the password securely, but also it may be a while until you need it again <press enter to continue>"
 
 
-ADMIN_IP_RANGE=10.10.254
+#Misses last octet, currenlty hardcoded as /24.
+	ADMIN_IP_RANGE=10.10.254
 
 #1.
-installOVPN server.vpn.karmacomputing.co.uk
+	installOVPN
 #2.
-configureOVPNServer
+	configureOVPNServer "server.vpn.karmacomputing.co.uk" "karma_server"
 #3.
-autostartVPNServer
+	autostartVPNServer "karma_server"
 #4.
-configFW
+	configFW "${ADMIN_IP_RANGE}"
 #5.
-enableRouting
+	enableRouting
 
 #6.
-cat <<-EOF
+	cat <<-EOF
 #now (re)create clients - any existing clients will not work with this server as it is a new PKI CA:
 
 
@@ -146,4 +161,4 @@ else
 fi
 
 EOF
-#end of server configuration.
+}

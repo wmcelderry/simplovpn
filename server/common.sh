@@ -1,7 +1,7 @@
 
 function common_settings()
 {
-	cat common_settings.conf
+	cat "$(dirname "$(realpath "${0}")")/common_settings.conf"
 }
 
 function embedCA()
@@ -154,11 +154,6 @@ client-config-dir ccd
 #   ifconfig-push 10.9.0.1 10.9.0.2
 #bypass the fw and enable client to client comms - not good for customers, but useful for other situations:
 ;client-to-client
-
-#optionally increase security agains DOS: create HMAC firewall:
-#   openvpn --genkey --secret ta.key
-# send to all clients & add following config (2nd param is 0 on server, 1 on clients)
-;tls-auth ta.key 0
 
 
 EOF
