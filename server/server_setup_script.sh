@@ -47,7 +47,7 @@ function configureOVPNServer()
 
 	"${VPN_SCRIPT_ROOT}/mk_server_config.sh" "${VPN_HOST_CN}"
 
-	sudo cp "${VPN_HOST_CN}.ovpn" /etc/openvpn/${CONF_FILENAME}.conf
+	sudo mv "${VPN_HOST_CN}.ovpn" /etc/openvpn/${CONF_FILENAME}.conf
 	sudo chmod 600 /etc/openvpn/${CONF_FILENAME}.conf
 	sudo chown root:root /etc/openvpn/${CONF_FILENAME}.conf
 
