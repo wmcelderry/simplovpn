@@ -45,7 +45,7 @@ function sshKeyOnly()
 
 function installOpenVPN()
 {
-	sudo apt install -u openvpn
+	sudo apt install -y openvpn
 }
 
 function downloadOVPNConfig()
