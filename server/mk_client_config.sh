@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_ROOT="$(dirname "$(realpath "${0}")")"
+
 #optional command line params.
 
 #id is the name of the client in the PKI system
@@ -9,7 +11,7 @@ SERVER=$2
 
 
 #get access to functions in 'common.sh'
-source common.sh
+source "${SCRIPT_ROOT}/common.sh"
 
 
 #confirm parameters, or ask for values:
