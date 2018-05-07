@@ -116,7 +116,7 @@ function setupKarmaVPN()
 {
 #server:
 
-	read -p "Do you want to generate the PKI system from scratch (this will invalidate the existing keys if completed)" REPLY
+	read -p "Do you want to generate the PKI system from scratch (this will invalidate the existing keys if completed) (YES to continue)" REPLY
 	if [[ "${REPLY}" == "YES" ]] ; then
 #0.
 		generatePKI
@@ -162,3 +162,5 @@ fi
 
 EOF
 }
+
+setupKarmaVPN
