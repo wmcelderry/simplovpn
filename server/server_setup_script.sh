@@ -58,9 +58,10 @@ function configureOVPNServer()
 
 function autostartVPNServer()
 {
-	CONF_FILENAME="${1}"
+	VPN_NAME="${1}"
 #modify file
-	sudo sed -i 's/^AUTOSTART=.*/AUTOSTART="'"${CONF_FILENAME}"'"/g' /etc/default/openvpn
+	sudo sed -i 's/^#\?AUTOSTART="none"/AUTOSTART="'"${VPN_NAME}"'"/g' /etc/default/openvpn
+	sudo systemctl start "${VPN_NAME}"
 }
 
 function configFW()
