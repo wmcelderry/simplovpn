@@ -10,7 +10,7 @@ function configClient()
 	EOF
 
 	sudo chown root:root "/etc/openvpn/ccd/${CN}"
-	sudo chmod 400 "/etc/openvpn/ccd/${CN}"
+	sudo chmod 644 "/etc/openvpn/ccd/${CN}"
 }
 
 function configNetwork()
@@ -26,7 +26,7 @@ function configNetwork()
 
 	sudo tee -a "/etc/openvpn/ccd/${CN}" > /dev/null  <<-EOF
 		push "client-nat snat ${CLIENT_NETWORK} ${CLIENT_NETMASK} ${VPN_IP_RANGE}"
-		iroute ${VPN_IP_RANGE}
+		iroute ${VPN_IP_RANGE} ${CLIENT_NETMASK}
 	EOF
 }
 

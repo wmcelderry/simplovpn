@@ -132,8 +132,8 @@ dev tun0
 
 
 topology subnet
-server 10.10.0.0 255.255.255.0
-ifconfig-pool-persist ipp.txt
+server 10.10.0.0 255.255.0.0 nopool
+;ifconfig-pool-persist ipp.txt
 keepalive 10 120
 max-clients 254
 client-config-dir ccd

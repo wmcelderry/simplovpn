@@ -52,6 +52,8 @@ function configureOVPNServer()
 	sudo chown root:root /etc/openvpn/${CONF_FILENAME}.conf
 
 	sudo mkdir -p /etc/openvpn/ccd
+#has to be set like so because of user & group demotion to 'nobody/nogroup'
+	sudo chown 755 /etc/openvpn/ccd
 }
 
 function autostartVPNServer()
@@ -164,3 +166,4 @@ EOF
 }
 
 setupKarmaVPN
+
