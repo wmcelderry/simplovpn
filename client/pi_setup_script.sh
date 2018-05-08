@@ -212,7 +212,10 @@ function configClient()
 	prioritiseInterface "eth1"
 #7.
 	echo "Consider making this device ONLY allow access to SSH with authorized key. Reminder how in this script, function 'sshKeyOnly'"
+#8. start immediately:
+	sudo systemctl start openvpn@karma_vpn.service
 }
 
 
-#configClient "${CN}" "${EN_LOCAL_SSH}"
+configClient "${CN}" "${EN_LOCAL_SSH}"
+
