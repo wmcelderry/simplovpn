@@ -110,7 +110,7 @@ function enableRouting()
 #immetiately
 	sudo sysctl net.ipv4.ip_forward=1 >/dev/null
 #make persistant.
-	sudo sed -i 's/.*net.ipv4.ip_forward=.*/net.ipv4.forward=1/g' /etc/sysctl.conf
+	sudo sed -i 's/.*net.ipv4.ip_forward=.*/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 }
 
 
