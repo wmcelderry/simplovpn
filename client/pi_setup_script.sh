@@ -105,6 +105,8 @@ function configFW()
 #optionally enable ssh access from the local network (otherwise new connections will only be available over the tunnel, not directly over the LAN):
 	if [[ "${EN_LOCAL_SSH}" == "local_enabled" ]] ; then
 		sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+        # Ensure that Pi is set-up to enable ssh upon reboot
+        sudo touch /boot/ssh
 	fi
 
 	sudo iptables -P INPUT DROP
